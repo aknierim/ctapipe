@@ -1,14 +1,15 @@
 import tables
 import tempfile
 import shutil
-
-from ctapipe.core import run_tool
 from pathlib import Path
-from ctapipe.io.astropy_helpers import read_table
-from astropy.table import vstack
-from astropy.utils.diff import report_diff_values
 from io import StringIO
 
+import numpy as np
+from astropy.table import vstack
+from astropy.utils.diff import report_diff_values
+
+from ctapipe.core import run_tool
+from ctapipe.io.astropy_helpers import read_table
 from ctapipe.tools.process import ProcessorTool
 
 try:
@@ -162,3 +163,11 @@ def test_dl2(tmp_path, dl2_shower_geometry_file, dl2_proton_geometry_file):
     assert (
         identical
     ), f"Merged table not equal to individual tables. Diff:\n {diff.getvalue()}"
+
+    stats_key = '/dl2/service/stereo_statistics/HillasReconstructor'
+    merged_stats = read_table(output, stats_key)
+    stats1 = read_table(dl2_shower_geometry_file, stats_key)
+    stats2 = read_table(dl2_proton_geometry_file, stats_key)
+
+    for col in ('counts', 'cumulative_counts'):
+        assert np.all(merged_stats[col] == (stats1[col] + stats2[col]))

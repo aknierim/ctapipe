@@ -231,10 +231,11 @@ class ProcessorTool(Tool):
 
         if self.should_compute_dl2:
             reconstructor = self.process_shower.reconstructor
+            reconstructor_name = self.process_shower.reconstructor_type
             write_table(
                 reconstructor.check_parameters.to_table(functions=True),
                 self.write.output_path,
-                "/dl2/service/image_statistics",
+                f"/dl2/service/stereo_statistics/{reconstructor_name}",
                 append=True,
             )
 
